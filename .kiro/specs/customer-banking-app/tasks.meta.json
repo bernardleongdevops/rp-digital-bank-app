@@ -1,0 +1,652 @@
+{
+  "pbtResults": {
+    "1.4 Write property test for config integrity (fail-fast)": {
+      "status": "passed",
+      "lastRunTimestamp": 1793072525258
+    },
+    "4.4 Write property test for header injection on every outbound call": {
+      "status": "passed",
+      "lastRunTimestamp": 1793072558919
+    },
+    "4.3 Write property test for credential confinement": {
+      "status": "passed",
+      "lastRunTimestamp": 1793072722281
+    },
+    "5.3 Write property test for secret confinement across BFF routes": {
+      "status": "passed",
+      "lastRunTimestamp": 1793077771943
+    }
+  },
+  "executionHistory": {
+    "1.1 Initialize the Next.js 14+ App Router TypeScript project": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001471619
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001487818
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009152008
+      }
+    ],
+    "1.2 Add repository setup artifacts": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001472941
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009156373
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009256748
+      }
+    ],
+    "1.3 Implement the fail-fast environment configuration module": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001473267
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009262408
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009627139
+      }
+    ],
+    "2.1 Create `lib/types.ts`": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001473379
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009263692
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009625694
+      }
+    ],
+    "3.1 Configure the NextAuth route handler and session callbacks": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001473494
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009634121
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062314527
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062320767
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793067094700
+      }
+    ],
+    "3.2 Implement route-protection middleware and login/logout entry points": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001473586
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062314648
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793067112000
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793067424720
+      }
+    ],
+    "4.1 Implement `sandboxFetch` with credential injection, timeouts, and normalization": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001473677
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062314745
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793067430026
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793068498103
+      }
+    ],
+    "4.2 Implement the typed sandbox functions": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001473784
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062314851
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793068503277
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793069065104
+      }
+    ],
+    "5.1 Implement the read-endpoint BFF handlers": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001473862
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062314959
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793069070683
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070004308
+      }
+    ],
+    "5.2 Implement the transfer BFF handler": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001473937
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315050
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070009110
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070354907
+      }
+    ],
+    "6.1 Implement the transfer outcome mapper": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474017
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315137
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070360972
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070777005
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078042425
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078163701
+      }
+    ],
+    "6.2 Implement the shared UI state components": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474122
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315239
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070361969
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070777900
+      }
+    ],
+    "7.1 Implement the `/dashboard` page": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474212
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315357
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070785859
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071181839
+      }
+    ],
+    "8.1 Implement the `/accounts/[accountNumber]` page": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474299
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315456
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070787410
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071180806
+      }
+    ],
+    "9.1 Implement the Transfer_Form with full client-side validation": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474398
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315541
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070788563
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071242632
+      }
+    ],
+    "9.2 Implement transfer submission and outcome rendering": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474534
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315642
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071248553
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071653950
+      }
+    ],
+    "10. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474651
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315734
+      }
+    ],
+    "11.1 Enforce browser-to-BFF-only data access": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474728
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315833
+      }
+    ],
+    "12.1 Add the GitHub Actions CI workflow": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474815
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009264842
+      },
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009628289
+      }
+    ],
+    "13.1 Wire navigation and verify the full test suite": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001474911
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062315925
+      }
+    ],
+    "14. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793001475025
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793062316026
+      }
+    ],
+    "2. Implement shared data model types": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009625824
+      }
+    ],
+    "1. Project scaffolding, repository setup, and environment configuration": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009627271
+      }
+    ],
+    "12. Continuous integration pipeline": [
+      {
+        "executionId": "7163c2a0-1ad9-4656-aaa6-a3ed99a2e613",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793009628388
+      }
+    ],
+    "3. Authentication with NextAuth and the Keycloak provider": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793067424817
+      }
+    ],
+    "4. Server-side `sandboxClient` helper": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793069065211
+      }
+    ],
+    "5. BFF route handlers (1:1 with sandbox endpoints)": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070355034
+      }
+    ],
+    "6. Outcome mapping and shared UI state components": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793070778029
+      }
+    ],
+    "8. Statement view": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071180980
+      }
+    ],
+    "7. Dashboard view": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071181963
+      }
+    ],
+    "9. Transfer feature": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071654118
+      }
+    ],
+    "1.4 Write property test for config integrity (fail-fast)": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071759053
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072778250
+      }
+    ],
+    "3.3 Write unit tests for auth session exposure and route protection": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071760500
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072779449
+      }
+    ],
+    "4.3 Write property test for credential confinement": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071761893
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072780698
+      }
+    ],
+    "4.4 Write property test for header injection on every outbound call": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071763313
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072782316
+      }
+    ],
+    "4.5 Write unit tests for timeout/abort and error normalization": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793071764529
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072783439
+      }
+    ],
+    "5.3 Write property test for secret confinement across BFF routes": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072789721
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078168159
+      }
+    ],
+    "5.4 Write integration tests for BFF routes with mocked sandbox": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072790923
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078169379
+      }
+    ],
+    "6.3 Write property test for transfer outcome determinism": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072792815
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078164732
+      }
+    ],
+    "6.4 Write unit tests for the shared state components": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072794221
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078166268
+      }
+    ],
+    "7.2 Write integration tests for the Dashboard": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793072795313
+      },
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078170458
+      }
+    ],
+    "9.3 Write property test for validation soundness": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078176888
+      }
+    ],
+    "9.4 Write property test for the idempotent submit guard": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078178274
+      }
+    ],
+    "9.5 Write integration tests for transfer outcomes": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078180172
+      }
+    ],
+    "8.2 Write integration tests for the Statement view": [
+      {
+        "executionId": "54983277-9ff8-4f0a-a6c6-3d43d7eb25f7",
+        "chatSessionId": "sess_938dfedc-90fd-487c-8014-8beda5f2c870",
+        "timestamp": 1793078181147
+      }
+    ]
+  }
+}

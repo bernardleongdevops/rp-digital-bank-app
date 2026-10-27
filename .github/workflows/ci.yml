@@ -1,0 +1,65 @@
+name: CI
+
+# Runs the Banking_App CI pipeline. The pipeline uses only this repository's
+# sources and does not depend on the sandbox repository (Requirement 9.6).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI time.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: install -> lint -> type-check -> build
+    runs-on: ubuntu-latest
+
+    # Placeholder values so the fail-fast Environment_Config module can start
+    # during build/test. These are non-secret CI dummies, not real credentials;
+    # no network calls are made to the sandbox during CI (Requirement 9.6).
+    env:
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ci-placeholder-secret-not-used-in-production
+      KEYCLOAK_ISSUER: http://localhost:8080/realms/digital-bank
+      KEYCLOAK_CLIENT_ID: sandbox-web
+      SANDBOX_API_BASE_URL: http://localhost:8081/api/v1
+      SANDBOX_API_KEY: ci-placeholder-key
+
+    steps:
+      # Distinct ordered step 0: check out only this repository's sources.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Pinned to Node 20, which satisfies the package.json engines
+          # constraint (node >=18.18.0).
+          node-version: '20'
+          cache: npm
+
+      # Distinct ordered step 1: install dependencies.
+      # `npm ci` installs strictly from package-lock.json for reproducibility.
+      - name: Install dependencies
+        run: npm ci
+
+      # Distinct ordered step 2: lint.
+      - name: Lint
+        run: npm run lint
+
+      # Distinct ordered step 3: type-check (tsc --noEmit).
+      - name: Type-check
+        run: npm run type-check
+
+      # Tests run as part of the pipeline, before the build.
+      - name: Test
+        run: npm test
+
+      # Distinct ordered step 4: build the application.
+      - name: Build
+        run: npm run build
