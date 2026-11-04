@@ -1,22 +1,31 @@
+/*
+ * Theme: Republic Polytechnic brand.
+ * Primary accent is the RP forest green; clean white surface cards on a soft
+ * green-tinted background with near-black text. Image-free — colour and type
+ * only. Semantic state colours (success/info/warn/error) are preserved.
+ */
 :root {
-  --foreground: #1a1f36;
-  --muted: #6b7280;
-  --background: #f4f6fb;
+  --foreground: #16261c;
+  --muted: #5f6f66;
+  --background: #eef3ef;
   --surface: #ffffff;
-  --border: #e4e8f0;
-  --primary: #1f5fd6;
-  --primary-hover: #184db0;
+  --border: #dbe6df;
+  --primary: #0a7d3e; /* RP green */
+  --primary-hover: #086230;
+  --primary-dark: #0b3d24; /* deep green for the brand bar */
   --primary-contrast: #ffffff;
-  --success-bg: #e8f7ee;
-  --success-fg: #15663a;
-  --info-bg: #e9f1fe;
+  --accent: #8bc53f; /* RP lime highlight */
+  --focus-ring: rgba(10, 125, 62, 0.18);
+  --success-bg: #e6f6ec;
+  --success-fg: #0a7d3e;
+  --info-bg: #eaf4ff;
   --info-fg: #1f5fd6;
   --warn-bg: #fff6e6;
   --warn-fg: #8a5a00;
   --error-bg: #fdecec;
   --error-fg: #b42318;
   --radius: 10px;
-  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.06);
+  --shadow: 0 1px 2px rgba(11, 61, 36, 0.04), 0 4px 16px rgba(11, 61, 36, 0.07);
 }
 
 * {
@@ -37,6 +46,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Thin RP brand accent bar across the very top of every page. */
+body::before {
+  content: "";
+  display: block;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary) 55%, var(--accent));
+}
+
 /* --- Layout ---------------------------------------------------------------- */
 
 main {
@@ -55,7 +72,7 @@ header {
   flex-wrap: wrap;
   gap: 12px 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--primary);
 }
 
 header h1 {
@@ -73,6 +90,7 @@ h1 {
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  color: var(--primary-dark);
 }
 
 h2 {
@@ -140,22 +158,25 @@ ul[aria-label="Account list"] li a {
   gap: 10px;
   padding: 14px 16px;
   border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
   border-radius: var(--radius);
   color: var(--foreground);
   font-weight: 500;
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
 ul[aria-label="Account list"] li a:hover {
   text-decoration: none;
   border-color: var(--primary);
-  background: #f8faff;
+  background: #f3f9f5;
+  box-shadow: var(--shadow);
 }
 
 [data-testid="account-balance"] {
   margin-left: auto;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+  color: var(--primary-dark);
 }
 
 /* --- Buttons --------------------------------------------------------------- */
@@ -189,7 +210,7 @@ header button {
 }
 
 header button:hover:not(:disabled) {
-  background: #eef3fe;
+  background: #e7f3ec;
   color: var(--primary-hover);
 }
 
@@ -231,7 +252,7 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(31, 95, 214, 0.15);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 input[aria-invalid="true"],
@@ -279,11 +300,12 @@ td {
 }
 
 th {
-  color: var(--muted);
+  color: var(--primary-dark);
   font-weight: 600;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  border-bottom: 2px solid var(--primary);
 }
 
 td {
@@ -343,11 +365,4 @@ td[data-direction="DEBIT"] {
 [data-outcome="UNEXPECTED"] {
   background: var(--error-bg);
   color: var(--error-fg);
-}
-
-/* --- Login page ------------------------------------------------------------ */
-
-main:has(> h1:only-child),
-main > h1 + [data-testid="login-error"] {
-  /* no-op guard; login page styling handled by generic button/section rules */
 }

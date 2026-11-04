@@ -73,7 +73,7 @@ export function LoginClient() {
 
   return (
     <main>
-      <h1>RP Digital Bank</h1>
+      <h1>FiNova Digital Bank</h1>
       <section>
         <h2>Sign in</h2>
         <p role="note" style={{ color: 'var(--muted)', marginBottom: '16px' }}>

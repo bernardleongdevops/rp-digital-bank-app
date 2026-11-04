@@ -15,7 +15,7 @@ import { LoginClient } from './LoginClient';
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<main><h1>RP Digital Bank</h1></main>}>
+    <Suspense fallback={<main><h1>FiNova Digital Bank</h1></main>}>
       <LoginClient />
     </Suspense>
   );

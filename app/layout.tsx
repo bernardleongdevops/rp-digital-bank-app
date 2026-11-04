@@ -3,7 +3,7 @@ import './globals.css';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'RP Digital Bank',
+  title: 'FiNova Digital Bank',
   description: 'Customer-facing digital banking web application',
 };
 
