@@ -36,10 +36,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import type { Account, Transaction } from '@/lib/types';
+import { formatCurrency } from '@/lib/currency';
+import { AppHeader } from '@/app/components/AppHeader';
 import { EmptyState } from '@/app/components/EmptyState';
 import { ErrorState } from '@/app/components/ErrorState';
 import { LoadingState } from '@/app/components/LoadingState';
-import { LogoutButton } from '@/app/components/LogoutButton';
+import { RefreshButton } from '@/app/components/RefreshButton';
 
 export interface StatementClientProps {
   /** The owned account number from the route segment. */
@@ -158,19 +160,6 @@ async function bffGet<T>(
   }
 }
 
-/** Format a numeric balance as a currency value for display (Requirement 3.5). */
-function formatCurrency(amount: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency,
-    }).format(amount);
-  } catch {
-    // Unknown currency code: fall back to a plain fixed-2 value plus the code.
-    return `${amount.toFixed(2)} ${currency}`;
-  }
-}
-
 /** Format an ISO-8601 timestamp for display; fall back to the raw value. */
 function formatTimestamp(iso: string): string {
   const ms = Date.parse(iso);
@@ -184,17 +173,25 @@ export function StatementClient({ accountNumber }: StatementClientProps) {
     initialRegion<Transaction[]>(),
   );
 
-  // Date-range filter inputs (controlled). `appliedRange` is the range that is
-  // currently reflected in the loaded transactions.
+  // Date-range filter inputs (controlled). `appliedRangeRef` holds the range
+  // that is currently reflected in the loaded transactions (undefined = full
+  // history) so a Manual_Refresh re-runs the SAME currently applied range
+  // rather than re-deriving it from the live inputs (Requirement 1.5).
   const [fromInput, setFromInput] = useState('');
   const [toInput, setToInput] = useState('');
   const [rangeError, setRangeError] = useState<string | null>(null);
+  const appliedRangeRef = useRef<{ from: string; to: string } | undefined>(undefined);
 
   // Retain the last successfully loaded transactions across an invalid-range
   // submission (Requirement 3.4): we never clear `transactions.data` on a
   // client-side validation failure.
 
   // Load the account summary (Requirement 3.1).
+  //
+  // Every non-ok branch RETAINS the previously loaded `data` (via `prev.data`)
+  // so a failed Manual_Refresh never blanks the currently displayed account
+  // summary (Requirement 1.8). On the first mount `prev.data` is null, so the
+  // region renders its loading / error state exactly as before.
   const loadAccount = useCallback(async () => {
     setAccount((prev) => ({ ...prev, status: 'loading', errorMessage: undefined }));
     const res = await bffGet<Account>(
@@ -206,38 +203,38 @@ export function StatementClient({ accountNumber }: StatementClientProps) {
         return;
       case 'unauthenticated':
         reauthenticate();
-        setAccount({
+        setAccount((prev) => ({
+          ...prev,
           status: 'error',
-          data: null,
           canRetry: true,
           errorMessage: 'Your session has expired. Redirecting you to sign in…',
-        });
+        }));
         return;
       case 'not-found':
-        setAccount({
+        setAccount((prev) => ({
+          ...prev,
           status: 'error',
-          data: null,
           canRetry: false,
           notFound: true,
           errorMessage:
             'This account could not be found, or it is not one of your accounts.',
-        });
+        }));
         return;
       case 'rate-limited':
-        setAccount({
+        setAccount((prev) => ({
+          ...prev,
           status: 'error',
-          data: null,
           canRetry: false,
           errorMessage: messageForStatus(429, 'RATE_LIMITED'),
-        });
+        }));
         return;
       case 'error':
-        setAccount({
+        setAccount((prev) => ({
+          ...prev,
           status: 'error',
-          data: null,
           canRetry: true,
           errorMessage: messageForStatus(res.status, res.code),
-        });
+        }));
         return;
     }
   }, [accountNumber]);
@@ -245,6 +242,9 @@ export function StatementClient({ accountNumber }: StatementClientProps) {
   // Load transactions, optionally with a validated range (Requirement 3.2, 3.3).
   const loadTransactions = useCallback(
     async (range?: { from: string; to: string }) => {
+      // Record the range now applied so a later Manual_Refresh re-runs exactly
+      // this range (or the full history when undefined) (Requirement 1.5).
+      appliedRangeRef.current = range;
       setTransactions((prev) => ({ ...prev, status: 'loading', errorMessage: undefined }));
 
       const params = new URLSearchParams();
@@ -323,6 +323,19 @@ export function StatementClient({ accountNumber }: StatementClientProps) {
     void loadTransactions();
   }, [loadAccount, loadTransactions]);
 
+  /**
+   * Manual_Refresh handler (Requirement 1.5): re-invoke BOTH region loaders and
+   * return a single promise that settles only when both have settled. The
+   * transactions loader re-runs the CURRENTLY APPLIED date range (if any) so a
+   * refresh preserves the active filter. The shared `RefreshButton` disables
+   * itself for the duration (single-flight, Requirement 1.6) and re-enables on
+   * settle (Requirements 1.7, 1.8); each region replaces its data on success or
+   * retains prior data + shows its own error on failure.
+   */
+  const refreshAll = useCallback(async () => {
+    await Promise.all([loadAccount(), loadTransactions(appliedRangeRef.current)]);
+  }, [loadAccount, loadTransactions]);
+
   // Apply the date-range filter (Requirement 3.3, 3.4). Validation happens
   // here, BEFORE any request is sent.
   const onApplyRange = useCallback(
@@ -376,12 +389,17 @@ export function StatementClient({ accountNumber }: StatementClientProps) {
 
   return (
     <main>
+      {/* Shared navigation + single logout control (Requirements 8.1, 8.2,
+          8.3). The Statement_View is reached from the accounts area, so the
+          accounts destination is marked active. The AppHeader replaces the
+          ad-hoc back-to-dashboard nav and the standalone LogoutButton. */}
+      <AppHeader active="accounts" />
       <header>
-        <nav aria-label="Primary">
-          <a href="/dashboard">Back to dashboard</a>
-        </nav>
         <h1>Account statement</h1>
-        <LogoutButton />
+        {/* Manual_Refresh (Requirements 1.5, 1.6-1.8): re-fetch the account
+            summary + transactions (re-running the applied date range) without
+            a full page reload; disabled while in flight. */}
+        <RefreshButton onRefresh={refreshAll} label="Refresh" refreshingLabel="Refreshing…" />
       </header>
 
       {/* --- Account summary region (Requirement 3.1, 3.5) --- */}
@@ -480,6 +498,7 @@ export function StatementClient({ accountNumber }: StatementClientProps) {
               <tr>
                 <th scope="col">Date</th>
                 <th scope="col">Description</th>
+                <th scope="col">Counterparty</th>
                 <th scope="col">Direction</th>
                 <th scope="col">Amount</th>
                 <th scope="col">Running balance</th>
@@ -488,17 +507,51 @@ export function StatementClient({ accountNumber }: StatementClientProps) {
             <tbody>
               {transactions.data?.map((txn) => {
                 const currency = account.data?.currency ?? '';
-                const signedAmount =
-                  txn.direction === 'DEBIT' ? -Math.abs(txn.amount) : Math.abs(txn.amount);
+                // Render the amount with an explicit, unambiguous sign that
+                // matches the transaction's direction: a DEBIT reduces the
+                // balance (negative), a CREDIT increases it (positive)
+                // (Requirement 4.1).
+                const isDebit = txn.direction === 'DEBIT';
+                const signedAmount = isDebit ? -Math.abs(txn.amount) : Math.abs(txn.amount);
+                // Unambiguous human-readable direction label (Requirement 4.1).
+                // The raw `txn.direction` code (CREDIT / DEBIT) is also rendered
+                // verbatim so the direction is textually explicit either way.
+                const directionLabel = isDebit ? 'Debit' : 'Credit';
+                // Counterparty is optional: render it only when the transaction
+                // carries one, otherwise show a neutral placeholder with an
+                // accessible label — never an error or a broken cell
+                // (Requirement 4.2). The placeholder element's text is NOT a
+                // bare em dash so it stays visually neutral while remaining
+                // distinguishable from the running-balance placeholder.
+                const hasCounterparty =
+                  typeof txn.counterparty === 'string' && txn.counterparty.trim() !== '';
                 return (
                   <tr key={txn.id}>
                     <td>{formatTimestamp(txn.timestamp)}</td>
                     <td>{txn.description}</td>
-                    <td>{txn.direction}</td>
+                    <td data-testid="txn-counterparty">
+                      {hasCounterparty ? (
+                        txn.counterparty
+                      ) : (
+                        <span>
+                          –<span className="sr-only">No counterparty</span>
+                        </span>
+                      )}
+                    </td>
+                    <td data-direction={txn.direction}>
+                      {/* Both the machine code and a plain-language label so
+                          debit vs credit is unambiguous (Requirement 4.1). The
+                          raw code is kept in its own element so it reads
+                          exactly as the transaction's direction. */}
+                      <span data-testid="txn-direction">{txn.direction}</span>
+                      <span className="sr-only"> ({directionLabel})</span>
+                    </td>
                     <td data-direction={txn.direction}>
                       {currency ? formatCurrency(signedAmount, currency) : signedAmount.toFixed(2)}
                     </td>
                     <td>
+                      {/* Running balance only when the entry includes one
+                          (Requirement 4.3); otherwise a neutral placeholder. */}
                       {txn.runningBalance !== undefined
                         ? currency
                           ? formatCurrency(txn.runningBalance, currency)

@@ -46,6 +46,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { TransferForm } from './TransferForm';
+import { PayeePicker } from './PayeePicker';
 import { TransferResultBanner } from '@/app/components/TransferResultBanner';
 import {
   mapTransferOutcome,
@@ -76,6 +77,21 @@ export function TransferContainer() {
   // remounts `TransferForm`, giving a clean field reset (Requirement 4.3) while
   // respecting the form's 9.1 public API (no reset prop needed).
   const [formKey, setFormKey] = useState(0);
+
+  // Payee_Picker -> Transfer_Form "To account" prefill (task 8.1, Requirements
+  // 5.5, 5.6 / Property 10). Selecting a Saved_Payee sets `prefillToAccount` to
+  // exactly that payee's destination account and bumps a monotonically
+  // increasing nonce so the form applies the value on each selection (even a
+  // re-selection of the same payee) while keeping the field user-editable
+  // afterwards.
+  const [prefillToAccount, setPrefillToAccount] = useState<string | undefined>(undefined);
+  const [prefillNonce, setPrefillNonce] = useState(0);
+
+  /** Payee_Picker seam: populate "To account" with the selected payee's value. */
+  const handleSelectPayee = useCallback((destinationAccount: string) => {
+    setPrefillToAccount(destinationAccount);
+    setPrefillNonce((n) => n + 1);
+  }, []);
 
   /**
    * Run one transfer request cycle for the given validated values. Guarded so
@@ -138,7 +154,11 @@ export function TransferContainer() {
         key={formKey}
         onValidSubmit={handleValidSubmit}
         submitting={submitting}
+        prefillToAccount={prefillToAccount}
+        prefillNonce={prefillNonce}
       />
+
+      <PayeePicker onSelectPayee={handleSelectPayee} />
 
       {presentation ? (
         <TransferResultBanner presentation={presentation} onRetry={handleRetry} />

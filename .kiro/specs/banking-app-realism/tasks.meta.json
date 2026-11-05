@@ -1,0 +1,504 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Add the new domain types to `lib/types.ts`": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776905593
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776918579
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777079284
+      }
+    ],
+    "1.2 Extract the shared `Currency_Formatter` into `lib/currency.ts`": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776905696
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776919633
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777080306
+      }
+    ],
+    "1.4 Extend pure validation in `lib/transferValidation.ts`": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776905768
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777086184
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777256727
+      }
+    ],
+    "2.1 Add the account-management and profile `sandboxClient` functions": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776905847
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777283578
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777489559
+      }
+    ],
+    "2.2 Add the saved-payee and scheduled-transfer `sandboxClient` functions and their mappers": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776905932
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777284947
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777678801
+      }
+    ],
+    "2.3 Add the `respondFromMutationResult` helper to `app/api/bff/_lib/respond.ts`": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906005
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777286392
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777490956
+      }
+    ],
+    "3.1 Implement the Account_Management BFF routes": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906090
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777865743
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778077758
+      }
+    ],
+    "3.2 Implement the Saved_Payee BFF routes": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906179
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777866622
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778078724
+      }
+    ],
+    "3.3 Implement the Scheduled_Transfer BFF routes": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906251
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777868026
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778080124
+      }
+    ],
+    "3.4 Implement the profile-update BFF route": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906341
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777868771
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778080682
+      }
+    ],
+    "4.1 Implement the `mapMutationOutcome` mapper beside `mapTransferOutcome`": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906413
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777287444
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777491810
+      }
+    ],
+    "4.4 Implement the shared `AppHeader` component": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906482
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777087589
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777257649
+      }
+    ],
+    "4.5 Implement the shared `RefreshButton` (Manual_Refresh) with a single-flight guard": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906545
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777088422
+      },
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777258593
+      }
+    ],
+    "5.1 Wire Manual_Refresh into the Dashboard and Statement_View": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906596
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778089227
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782075925
+      }
+    ],
+    "5.3 Implement the Account_Details_View page and client": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906661
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778090590
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782076036
+      }
+    ],
+    "6.1 Implement the OpenAccountForm and open-account page": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906723
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778091514
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782077322
+      }
+    ],
+    "6.2 Implement the CloseAccountButton with confirmation": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906774
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782497625
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782651396
+      }
+    ],
+    "7.1 Enhance the Statement_View transaction presentation": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906829
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782087866
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782495802
+      }
+    ],
+    "8.1 Implement the PayeePicker and payee management surface": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906891
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778092919
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782078283
+      }
+    ],
+    "9.1 Implement the Scheduled_Transfer create/list/cancel views": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776906957
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782088682
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782496715
+      }
+    ],
+    "10.1 Implement the Profile_Page and ProfileClient": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776907042
+      },
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778093628
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782079251
+      }
+    ],
+    "11. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776907108
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782657683
+      }
+    ],
+    "12.1 Render AppHeader across all authenticated pages and confirm shared currency usage": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776907176
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782671368
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782848027
+      }
+    ],
+    "13.1 Wire navigation across all views and verify the full suite": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776907239
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782861059
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793783398200
+      }
+    ],
+    "14. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793776907300
+      },
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793783398869
+      }
+    ],
+    "1. Shared foundations: domain types, Currency_Formatter, and extended validation": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777256885
+      }
+    ],
+    "4. Mutation outcome mapper, AppHeader, and RefreshButton": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777491915
+      }
+    ],
+    "2. New `sandboxClient` functions and the mutation respond helper": [
+      {
+        "executionId": "53e78a8b-d9aa-41d2-9e37-f3d8a1230b74",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793777678951
+      }
+    ],
+    "3. New BFF route handlers": [
+      {
+        "executionId": "05475fcf-39e7-4009-8956-c7a1151963d2",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793778080737
+      }
+    ],
+    "5. Balance/refresh wiring (Req 1) and Account_Details_View (Req 2)": [
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782076132
+      }
+    ],
+    "8. Saved_Payees and the Payee_Picker (Req 5)": [
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782078365
+      }
+    ],
+    "10. Profile_Page (Req 7)": [
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782079319
+      }
+    ],
+    "7. Transaction history presentation improvements (Req 4)": [
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782495904
+      }
+    ],
+    "9. Scheduled_Transfers (Req 6)": [
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782496772
+      }
+    ],
+    "6. Account_Management views (Req 3)": [
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782651473
+      }
+    ],
+    "12. Cross-cutting shared-header/currency wiring and the direct-call guard (Req 8)": [
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793782848100
+      }
+    ],
+    "13. End-to-end wiring and verification": [
+      {
+        "executionId": "39e40f70-d76a-45b2-8f65-a91dda2fa275",
+        "chatSessionId": "sess_d463cb62-1253-4e59-88cf-ddfe64cd076e",
+        "timestamp": 1793783398287
+      }
+    ]
+  }
+}

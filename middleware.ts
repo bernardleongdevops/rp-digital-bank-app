@@ -2,7 +2,8 @@
  * Route-protection middleware for the Banking_App (Requirement 1.6).
  *
  * Protects the authenticated areas of the app -- `/dashboard`, `/accounts/*`,
- * and `/transfer` -- by requiring a valid NextAuth session. Any request for one
+ * `/transfer`, `/profile/*`, and `/scheduled-transfers/*` -- by requiring a
+ * valid NextAuth session. Any request for one
  * of these views that arrives without an authenticated session is redirected to
  * the `/login` entry point BEFORE the protected route (and therefore any
  * protected data) is rendered, so protected data is never exposed to an
@@ -46,12 +47,27 @@ export default withAuth({
 /**
  * Scope the middleware to the protected view trees only (Requirement 1.6):
  *   - `/dashboard`
- *   - `/accounts` and everything beneath it (`/accounts/ACC-1001`, ...)
+ *   - `/accounts` and everything beneath it (`/accounts/ACC-1001`,
+ *     `/accounts/open`, `/accounts/ACC-1001/details`, ...)
  *   - `/transfer`
+ *   - `/profile` and everything beneath it (the Profile_Page)
+ *   - `/scheduled-transfers` and everything beneath it (the Scheduled_Transfer
+ *     views)
+ *
+ * The `/profile` and `/scheduled-transfers` trees are authenticated
+ * destinations linked from the shared AppHeader, so they are protected here
+ * alongside the original trees; `/accounts/open` is already covered by the
+ * existing `/accounts/:path*` entry.
  *
  * Everything else (the public landing page, `/login`, the NextAuth API routes,
  * and static assets) is intentionally excluded.
  */
 export const config = {
-  matcher: ['/dashboard/:path*', '/accounts/:path*', '/transfer/:path*'],
+  matcher: [
+    '/dashboard/:path*',
+    '/accounts/:path*',
+    '/transfer/:path*',
+    '/profile/:path*',
+    '/scheduled-transfers/:path*',
+  ],
 };

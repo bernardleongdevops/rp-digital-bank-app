@@ -336,6 +336,7 @@ describe('e2e wired view: Transfer (Req 11.1, 11.2)', () => {
     const user = userEvent.setup();
     const fetchMock = installFetch((url, method) => {
       if (url.includes('/api/bff/accounts') && method === 'GET') return jsonResponse(ACCOUNTS);
+      if (url.includes('/api/bff/payees') && method === 'GET') return jsonResponse([]);
       if (url.includes('/api/bff/transfers') && method === 'POST') {
         return jsonResponse({ status: 201, error: 'COMPLETED' }, 201);
       }
@@ -356,6 +357,7 @@ describe('e2e wired view: Transfer (Req 11.1, 11.2)', () => {
     const user = userEvent.setup();
     installFetch((url, method) => {
       if (url.includes('/api/bff/accounts') && method === 'GET') return jsonResponse(ACCOUNTS);
+      if (url.includes('/api/bff/payees') && method === 'GET') return jsonResponse([]);
       if (url.includes('/api/bff/transfers') && method === 'POST') {
         return jsonResponse(
           { status: 409, error: 'INSUFFICIENT_FUNDS', message: 'no' },

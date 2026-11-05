@@ -12,7 +12,14 @@
 
 import { SessionProvider } from 'next-auth/react';
 import type { ReactNode } from 'react';
+import { AssistantGate } from '@/app/components/AssistantGate';
 
 export function Providers({ children }: { children: ReactNode }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return (
+    <SessionProvider>
+      {children}
+      {/* App-wide AI assistant: renders only when authenticated. */}
+      <AssistantGate />
+    </SessionProvider>
+  );
 }

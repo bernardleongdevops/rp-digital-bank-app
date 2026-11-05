@@ -42,10 +42,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import type { Account, Customer } from '@/lib/types';
+import { formatCurrency } from '@/lib/currency';
+import { AppHeader } from '@/app/components/AppHeader';
 import { LoadingState } from '@/app/components/LoadingState';
 import { ErrorState } from '@/app/components/ErrorState';
 import { EmptyState } from '@/app/components/EmptyState';
-import { LogoutButton } from '@/app/components/LogoutButton';
+import { RefreshButton } from '@/app/components/RefreshButton';
 
 /** A per-region fetch status. */
 type RegionStatus = 'loading' | 'ok' | 'error';
@@ -137,9 +139,19 @@ export function DashboardClient() {
     void signIn('keycloak', { callbackUrl: '/dashboard' });
   }, []);
 
-  /** Load the customer profile region independently of accounts. */
+  /**
+   * Load the customer profile region independently of accounts.
+   *
+   * On (re)load the region moves to `loading` but RETAINS any previously
+   * loaded `data` so a Manual_Refresh does not blank the currently displayed
+   * profile while the request is in flight (Requirement 1.6). On failure the
+   * prior `data` is likewise retained alongside the error so a failed refresh
+   * never wipes the previously displayed data (Requirement 1.8). On the very
+   * first mount there is no prior data, so the region renders its loading /
+   * error state exactly as before.
+   */
   const loadCustomer = useCallback(async () => {
-    setCustomer({ status: 'loading' });
+    setCustomer((prev) => ({ status: 'loading', data: prev.data }));
     try {
       const data = await fetchBff<Customer>('/api/bff/customer');
       setCustomer({ status: 'ok', data });
@@ -148,13 +160,13 @@ export function DashboardClient() {
         triggerReauthOnce();
         return;
       }
-      setCustomer({ status: 'error', error: toRegionError(e) });
+      setCustomer((prev) => ({ status: 'error', data: prev.data, error: toRegionError(e) }));
     }
   }, [triggerReauthOnce]);
 
   /** Load the accounts region independently of the customer profile. */
   const loadAccounts = useCallback(async () => {
-    setAccounts({ status: 'loading' });
+    setAccounts((prev) => ({ status: 'loading', data: prev.data }));
     try {
       const data = await fetchBff<Account[]>('/api/bff/accounts');
       setAccounts({ status: 'ok', data });
@@ -163,9 +175,22 @@ export function DashboardClient() {
         triggerReauthOnce();
         return;
       }
-      setAccounts({ status: 'error', error: toRegionError(e) });
+      setAccounts((prev) => ({ status: 'error', data: prev.data, error: toRegionError(e) }));
     }
   }, [triggerReauthOnce]);
+
+  /**
+   * Manual_Refresh handler (Requirement 1.4): re-invoke BOTH region loaders and
+   * return a single promise that settles only when both have settled. The
+   * shared `RefreshButton` disables itself for the duration (single-flight,
+   * Requirement 1.6) and re-enables on settle (Requirements 1.7, 1.8). Each
+   * region independently replaces its data on success or retains prior data +
+   * shows its own error on failure (handled inside the loaders above), so a
+   * partial failure degrades per region rather than failing the whole refresh.
+   */
+  const refreshAll = useCallback(async () => {
+    await Promise.all([loadCustomer(), loadAccounts()]);
+  }, [loadCustomer, loadAccounts]);
 
   // Kick off both regions on mount. They run concurrently and independently so
   // one failing does not block or hide the other (Requirement 2.7).
@@ -176,12 +201,16 @@ export function DashboardClient() {
 
   return (
     <main aria-labelledby="dashboard-heading">
+      {/* Shared navigation + single logout control (Requirements 8.1, 8.2,
+          8.3). The AppHeader provides the Transfer link and the logout
+          control, so the ad-hoc "Make a transfer" link and the standalone
+          LogoutButton are no longer rendered here. */}
+      <AppHeader active="dashboard" />
       <header>
         <h1 id="dashboard-heading">Your accounts</h1>
-        <nav aria-label="Primary">
-          <Link href="/transfer">Make a transfer</Link>
-        </nav>
-        <LogoutButton />
+        {/* Manual_Refresh (Requirements 1.4, 1.6-1.8): re-fetch both regions
+            without a full page reload; disabled while in flight. */}
+        <RefreshButton onRefresh={refreshAll} label="Refresh" refreshingLabel="Refreshing…" />
       </header>
 
       <section aria-labelledby="profile-heading" aria-busy={customer.status === 'loading'}>
@@ -270,20 +299,4 @@ function toRegionError(e: unknown): RegionError {
     return { message: e.message, canRetry: true };
   }
   return { message: 'Something went wrong. Please try again.', canRetry: true };
-}
-
-/**
- * Format an account balance as a currency value (Requirement 2.3). Falls back
- * to a plain `amount currency` rendering if the runtime/`currency` code is not
- * understood by `Intl.NumberFormat`, so an unusual currency never throws.
- */
-function formatCurrency(amount: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat('en-SG', {
-      style: 'currency',
-      currency,
-    }).format(amount);
-  } catch {
-    return `${amount.toFixed(2)} ${currency}`;
-  }
 }

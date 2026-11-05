@@ -195,17 +195,20 @@ describe("Property 5: no direct browser-to-gateway calls", () => {
             `must only call same-origin /api/bff/* endpoints.`,
         ).toBe(false);
 
-        // (b) Every literal fetch target is a same-origin app endpoint: either
-        // a BFF data endpoint (`/api/bff/*`) or a NextAuth auth endpoint
-        // (`/api/auth/*`, e.g. the federated-logout helper). Both are
-        // same-origin and server-side; neither is a direct call to the
-        // Sandbox_Gateway, which is what this property forbids.
+        // (b) Every literal fetch target is a same-origin app endpoint: a BFF
+        // data endpoint (`/api/bff/*`), the AI assistant BFF proxy
+        // (`/api/ai/*`), or a NextAuth auth endpoint (`/api/auth/*`, e.g. the
+        // federated-logout helper). All are same-origin and server-side;
+        // none is a direct call to the Sandbox_Gateway, which is what this
+        // property forbids.
         const isAllowedSameOrigin =
-          arg.literal.startsWith('/api/bff/') || arg.literal.startsWith('/api/auth/');
+          arg.literal.startsWith('/api/bff/') ||
+          arg.literal.startsWith('/api/auth/') ||
+          arg.literal.startsWith('/api/ai/');
         expect(
           isAllowedSameOrigin,
           `${rel}: fetch target "${arg.literal}" must be a same-origin ` +
-            `/api/bff/* or /api/auth/* endpoint (never the gateway directly).`,
+            `/api/bff/*, /api/auth/*, or /api/ai/* endpoint (never the gateway directly).`,
         ).toBe(true);
       }
     }

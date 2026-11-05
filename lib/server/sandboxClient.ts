@@ -36,10 +36,22 @@
  */
 
 import { getConfig } from '@/lib/server/config';
+import type { TransferOutcomeInput } from '@/lib/transferPresentation';
 import type {
   Account,
+  AssistantChatReply,
+  AssistantChatRequest,
+  AssistantChatResult,
+  CreatePayeeRequest,
   Customer,
+  CustomerProfileUpdate,
+  OpenAccountRequest,
+  Payee,
+  Recurrence,
   SandboxResult,
+  ScheduledTransfer,
+  ScheduledTransferRequest,
+  ScheduledTransferStatus,
   Transaction,
   TransactionDirection,
   TransferRequest,
@@ -55,6 +67,9 @@ export const READ_TIMEOUT_MS = 10_000;
 
 /** Per-call timeout for transfers (Requirement 4.10). */
 export const TRANSFER_TIMEOUT_MS = 30_000;
+
+/** Per-call timeout for an AI assistant chat turn. */
+export const AI_CHAT_TIMEOUT_MS = 30_000;
 
 /**
  * The origin every outbound request is sent from (Requirement 10.5). This is
@@ -676,5 +691,480 @@ export async function mapTransferResponse(res: Response): Promise<TransferResult
       return { kind: 'RATE_LIMITED', status: 429 };
     default:
       return { kind: 'ERROR', reason: 'UNEXPECTED', status: res.status };
+  }
+}
+
+// ===========================================================================
+// Banking App Realism — mutating sandbox functions (tasks 2.1 / 2.2)
+// ===========================================================================
+//
+// These extend the v1 read/transfer wrappers with the realism-spec mutations.
+// Each is a thin, typed wrapper over `sandboxFetch` so credential injection,
+// the per-call timeout, response normalization, and secret confinement are all
+// inherited from the single choke point (Requirements 9.1, 9.2) rather than
+// reimplemented. The optional `deps` param is threaded straight through so the
+// token/config/fetch seam used by the v1 tests works identically here.
+//
+// ASSUMED upstream paths: the paths below are marked *(ASSUMED)* per the design
+// ("ASSUMPTIONS — must be confirmed against the backend contract"). Because each
+// path is reached only through its function here, reconciling a path with the
+// backend contract is a one-line change that leaves the BFF routes, views, and
+// tests untouched.
+
+// ---------------------------------------------------------------------------
+// Account management + profile (task 2.1)
+// ---------------------------------------------------------------------------
+
+/**
+ * Open a new account for the signed-in customer —
+ * `POST /accounts` *(ASSUMED path — see design ASSUMPTIONS note)*. Requirements
+ * 3.1, 9.1. The `{ type, currency }` body is JSON-encoded and the OK payload is
+ * mapped onto the domain {@link Account} via the defensive {@link mapAccount}.
+ */
+export async function createAccount(
+  body: OpenAccountRequest,
+  deps: SandboxDeps = {},
+): Promise<SandboxResult<Account>> {
+  // ASSUMED: account-creation endpoint is `POST /accounts`.
+  const result = await sandboxFetch<WireAccount>(
+    '/accounts',
+    { method: 'POST', body: JSON.stringify(body) },
+    {},
+    deps,
+  );
+  return mapResult(result, mapAccount);
+}
+
+/**
+ * Close (deactivate) an owned account —
+ * `POST /accounts/{accountNumber}/close` *(ASSUMED path — see design
+ * ASSUMPTIONS note; may be `DELETE /accounts/{n}`)*. Requirements 3.5, 9.1.
+ *
+ * The account number is URL-path-encoded (as `getAccount`/`getTransactions`
+ * already do) so an unusual value cannot alter the request path. The OK payload
+ * is mapped onto the domain {@link Account} via {@link mapAccount}.
+ */
+export async function closeAccount(
+  accountNumber: string,
+  deps: SandboxDeps = {},
+): Promise<SandboxResult<Account>> {
+  // ASSUMED: account-close endpoint is `POST /accounts/{accountNumber}/close`.
+  const path = `/accounts/${encodeURIComponent(accountNumber)}/close`;
+  const result = await sandboxFetch<WireAccount>(path, { method: 'POST' }, {}, deps);
+  return mapResult(result, mapAccount);
+}
+
+/**
+ * Update the signed-in customer's profile (only where the gateway supports
+ * edits) — `PATCH /customers/me` *(ASSUMED path — see design ASSUMPTIONS
+ * note)*. Requirements 7.8, 9.1. The partial `CustomerProfileUpdate` body is
+ * JSON-encoded and the OK payload is mapped onto the domain {@link Customer}
+ * via the defensive {@link mapCustomer}.
+ */
+export async function updateCustomer(
+  body: CustomerProfileUpdate,
+  deps: SandboxDeps = {},
+): Promise<SandboxResult<Customer>> {
+  // ASSUMED: profile-update endpoint is `PATCH /customers/me`.
+  const result = await sandboxFetch<WireCustomer>(
+    '/customers/me',
+    { method: 'PATCH', body: JSON.stringify(body) },
+    {},
+    deps,
+  );
+  return mapResult(result, mapCustomer);
+}
+
+// ---------------------------------------------------------------------------
+// Saved payees + scheduled transfers (task 2.2)
+// ---------------------------------------------------------------------------
+//
+// Saved-payee and scheduled-/recurring-transfer wrappers (Requirements 5.1,
+// 5.4, 5.7, 6.1, 6.5, 6.6, 9.1). Like the task 2.1 wrappers, each routes
+// through the single `sandboxFetch` choke point so credential injection, the
+// per-call timeout, response normalization, and secret confinement are all
+// inherited rather than reimplemented. The optional `deps` param is threaded
+// straight through, and every path segment interpolated from a caller-supplied
+// id is `encodeURIComponent`-encoded so an unusual value cannot alter the
+// request path (as `getAccount`/`getTransactions`/`closeAccount` already do).
+
+// --- Wire shapes -----------------------------------------------------------
+
+/** Raw payee element as returned by `GET /payees` / `POST /payees`. */
+interface WirePayee {
+  payeeId?: string;
+  id?: string;
+  label?: string;
+  destinationAccount?: string;
+}
+
+/**
+ * Raw scheduled-transfer element as returned by
+ * `GET/POST /payments/scheduled-transfers` and the cancel endpoint. The backend
+ * contract is not yet confirmed, so the mapper tolerates both the `id` and the
+ * `scheduledTransferRef` spelling of the identifier, and projects any executed
+ * outcome fields onto the Transfer_Form outcome surface via `lastOutcome`.
+ */
+interface WireScheduledTransfer {
+  scheduledTransferRef?: string;
+  id?: string;
+  fromAccount?: string;
+  toAccount?: string;
+  amount?: number;
+  description?: string;
+  scheduleDate?: string;
+  recurrence?: string;
+  status?: string;
+  // Executed-outcome fields (any of these may be present once executed); they
+  // are projected onto `TransferOutcomeInput` for `lastOutcome`.
+  lastOutcome?: unknown;
+  outcome?: unknown;
+}
+
+// --- Coercion helpers ------------------------------------------------------
+
+/** The accepted recurrence values; anything else is coerced to the one-off default. */
+const RECURRENCES: readonly Recurrence[] = ['ONCE', 'DAILY', 'WEEKLY', 'MONTHLY'];
+
+/** The accepted scheduled-transfer status values. */
+const SCHEDULED_TRANSFER_STATUSES: readonly ScheduledTransferStatus[] = [
+  'SCHEDULED',
+  'EXECUTED',
+  'FAILED',
+  'CANCELLED',
+];
+
+/**
+ * Coerce an unknown wire value into a {@link Recurrence}. An unrecognized or
+ * missing value falls back to the one-off `'ONCE'` default so the mapper never
+ * produces an out-of-union value and never throws.
+ */
+function coerceRecurrence(v: unknown): Recurrence {
+  return typeof v === 'string' && (RECURRENCES as readonly string[]).includes(v)
+    ? (v as Recurrence)
+    : 'ONCE';
+}
+
+/**
+ * Coerce an unknown wire value into a {@link ScheduledTransferStatus}. An
+ * unrecognized or missing value falls back to `'SCHEDULED'` so the mapper stays
+ * total and never throws on an unexpected shape.
+ */
+function coerceScheduledTransferStatus(v: unknown): ScheduledTransferStatus {
+  return typeof v === 'string' && (SCHEDULED_TRANSFER_STATUSES as readonly string[]).includes(v)
+    ? (v as ScheduledTransferStatus)
+    : 'SCHEDULED';
+}
+
+/**
+ * Project any executed-outcome fields on a wire scheduled transfer onto the
+ * shared {@link TransferOutcomeInput} shape (`{ status, error?, message? }`) so
+ * the scheduled-transfer view renders executed outcomes through the exact same
+ * `mapTransferOutcome` path as the Transfer_Form (Requirement 6.7). Returns
+ * `undefined` when there is no usable outcome, and never throws on an
+ * unexpected shape.
+ */
+function mapLastOutcome(raw: unknown): TransferOutcomeInput | undefined {
+  if (!isRecord(raw)) return undefined;
+  if (typeof raw.status !== 'number') return undefined;
+  return {
+    status: raw.status,
+    error: typeof raw.error === 'string' ? raw.error : undefined,
+    message: typeof raw.message === 'string' ? raw.message : undefined,
+  };
+}
+
+// --- Defensive wire <-> domain mappers -------------------------------------
+
+/**
+ * Map a wire payee onto the domain {@link Payee}. Tolerates the `payeeId` or
+ * `id` spelling of the identifier and a null/non-object element, returning an
+ * empty-stringed payee rather than throwing (mirrors {@link mapAccount}).
+ */
+function mapPayee(w: WirePayee | null | undefined): Payee {
+  const p = isRecord(w) ? (w as WirePayee) : {};
+  return {
+    // The backend contract is unconfirmed; tolerate both `payeeId` and `id`.
+    id: p.payeeId ?? p.id ?? '',
+    label: p.label ?? '',
+    destinationAccount: p.destinationAccount ?? '',
+  };
+}
+
+/**
+ * Map a wire scheduled transfer onto the domain {@link ScheduledTransfer}.
+ * Tolerates the `scheduledTransferRef` or `id` spelling of the identifier,
+ * coerces `recurrence`/`status` into their domain unions, projects any executed
+ * outcome onto `lastOutcome`, and tolerates a null/non-object element — it
+ * never throws on an unexpected shape (mirrors {@link mapTransaction}).
+ */
+function mapScheduledTransfer(
+  w: WireScheduledTransfer | null | undefined,
+): ScheduledTransfer {
+  const s = isRecord(w) ? (w as WireScheduledTransfer) : {};
+  return {
+    // The backend contract is unconfirmed; tolerate both `scheduledTransferRef`
+    // and `id`.
+    id: s.scheduledTransferRef ?? s.id ?? '',
+    fromAccount: s.fromAccount ?? '',
+    toAccount: s.toAccount ?? '',
+    amount: typeof s.amount === 'number' ? s.amount : 0,
+    description: s.description ?? '',
+    scheduleDate: s.scheduleDate ?? '',
+    recurrence: coerceRecurrence(s.recurrence),
+    status: coerceScheduledTransferStatus(s.status),
+    // Project an executed outcome (under either key) onto the shared surface.
+    lastOutcome: mapLastOutcome(s.lastOutcome ?? s.outcome),
+  };
+}
+
+/**
+ * Normalize a void mutation (`DELETE`) outcome, tolerating a successful 2xx
+ * response that carries an empty / non-JSON body. The shared
+ * {@link normalizeResponse} treats a 2xx with an unparseable body as an
+ * `UNEXPECTED` contract break (it expects a JSON payload); for a delete there
+ * is legitimately no body, so we inspect the raw {@link Response} directly and
+ * map any 2xx to `OK` with no data, deferring to {@link normalizeResponse} only
+ * for the non-2xx (401/429/HTTP error) branches. Never leaks a secret: on
+ * failure it forwards only `status` + the `error` code, exactly as the shared
+ * normalizer does.
+ */
+async function normalizeVoidResponse(res: Response): Promise<SandboxResult<void>> {
+  if (res.ok) {
+    return { kind: 'OK', data: undefined };
+  }
+  // Reuse the shared normalizer for the error branches (401/429/HTTP + the
+  // Error_Body `error`-code forwarding). The `void` type parameter is safe
+  // because an error result carries no `data`.
+  return normalizeResponse<void>(res);
+}
+
+// --- Saved payees (Requirement 5) ------------------------------------------
+
+/**
+ * List the signed-in customer's saved payees —
+ * `GET /payees` *(ASSUMED path — see design ASSUMPTIONS note)*. Requirements
+ * 5.4, 9.1. Each wire payee is mapped onto the domain {@link Payee}; a
+ * non-array payload degrades to an empty list.
+ */
+export async function listPayees(deps: SandboxDeps = {}): Promise<SandboxResult<Payee[]>> {
+  // ASSUMED: saved-payee list endpoint is `GET /payees`.
+  const result = await sandboxFetch<WirePayee[]>('/payees', { method: 'GET' }, {}, deps);
+  return mapResult(result, (list) => (Array.isArray(list) ? list.map(mapPayee) : []));
+}
+
+/**
+ * Create a saved payee —
+ * `POST /payees` *(ASSUMED path — see design ASSUMPTIONS note)*. Requirements
+ * 5.1, 9.1. The `{ label, destinationAccount }` body is JSON-encoded and the OK
+ * payload is mapped onto the domain {@link Payee} via {@link mapPayee}.
+ */
+export async function createPayee(
+  body: CreatePayeeRequest,
+  deps: SandboxDeps = {},
+): Promise<SandboxResult<Payee>> {
+  // ASSUMED: saved-payee create endpoint is `POST /payees`.
+  const result = await sandboxFetch<WirePayee>(
+    '/payees',
+    { method: 'POST', body: JSON.stringify(body) },
+    {},
+    deps,
+  );
+  return mapResult(result, mapPayee);
+}
+
+/**
+ * Delete a saved payee —
+ * `DELETE /payees/{payeeId}` *(ASSUMED path — see design ASSUMPTIONS note)*.
+ * Requirements 5.7, 9.1. The id is URL-path-encoded. A successful delete has no
+ * body, so the void-tolerant {@link normalizeVoidResponse} is used rather than
+ * the JSON-expecting {@link normalizeResponse} so an empty 2xx body is NOT
+ * misreported as an unexpected contract break.
+ */
+export async function deletePayee(
+  payeeId: string,
+  deps: SandboxDeps = {},
+): Promise<SandboxResult<void>> {
+  // ASSUMED: saved-payee delete endpoint is `DELETE /payees/{payeeId}`.
+  const getAccessToken = deps.getAccessToken ?? defaultGetAccessToken;
+  const getSandboxConfig = deps.getSandboxConfig ?? defaultGetSandboxConfig;
+  const fetchImpl = deps.fetchImpl ?? fetch;
+
+  // Resolve credentials strictly server-side; missing credential -> no
+  // outbound request (Requirement 9.3), mirroring `sandboxFetch`.
+  const { sandboxApiBaseUrl, sandboxApiKey } = getSandboxConfig();
+  const token = await getAccessToken();
+  if (!token || !sandboxApiKey) {
+    return { kind: 'UNAUTHENTICATED' };
+  }
+
+  const headers = buildHeaders({ token, apiKey: sandboxApiKey, hasBody: false, extra: undefined });
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), READ_TIMEOUT_MS);
+  try {
+    const path = `/payees/${encodeURIComponent(payeeId)}`;
+    const res = await fetchImpl(`${sandboxApiBaseUrl}${path}`, {
+      method: 'DELETE',
+      headers,
+      signal: controller.signal,
+      credentials: 'omit',
+    });
+    return await normalizeVoidResponse(res);
+  } catch (err) {
+    if (isAbortError(err)) {
+      return { kind: 'ERROR', reason: 'TIMEOUT' };
+    }
+    return { kind: 'ERROR', reason: 'NETWORK' };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// --- Scheduled & recurring transfers (Requirement 6) -----------------------
+
+/**
+ * List the signed-in customer's scheduled transfers —
+ * `GET /payments/scheduled-transfers` *(ASSUMED path — see design ASSUMPTIONS
+ * note)*. Requirements 6.5, 9.1. Each wire element is mapped onto the domain
+ * {@link ScheduledTransfer} (with status/recurrence coerced and any executed
+ * outcome projected onto `lastOutcome`); a non-array payload degrades to an
+ * empty list.
+ */
+export async function listScheduledTransfers(
+  deps: SandboxDeps = {},
+): Promise<SandboxResult<ScheduledTransfer[]>> {
+  // ASSUMED: scheduled-transfer list endpoint is `GET /payments/scheduled-transfers`.
+  const result = await sandboxFetch<WireScheduledTransfer[]>(
+    '/payments/scheduled-transfers',
+    { method: 'GET' },
+    {},
+    deps,
+  );
+  return mapResult(result, (list) =>
+    Array.isArray(list) ? list.map(mapScheduledTransfer) : [],
+  );
+}
+
+/**
+ * Create a scheduled / recurring transfer —
+ * `POST /payments/scheduled-transfers` *(ASSUMED path — see design ASSUMPTIONS
+ * note)*. Requirements 6.1, 9.1. The body is JSON-encoded and the OK payload is
+ * mapped onto the domain {@link ScheduledTransfer} via {@link mapScheduledTransfer}.
+ */
+export async function createScheduledTransfer(
+  body: ScheduledTransferRequest,
+  deps: SandboxDeps = {},
+): Promise<SandboxResult<ScheduledTransfer>> {
+  // ASSUMED: scheduled-transfer create endpoint is `POST /payments/scheduled-transfers`.
+  const result = await sandboxFetch<WireScheduledTransfer>(
+    '/payments/scheduled-transfers',
+    { method: 'POST', body: JSON.stringify(body) },
+    {},
+    deps,
+  );
+  return mapResult(result, mapScheduledTransfer);
+}
+
+/**
+ * Cancel a scheduled transfer —
+ * `POST /payments/scheduled-transfers/{id}/cancel` *(ASSUMED path — see design
+ * ASSUMPTIONS note; may be `DELETE`)*. Requirements 6.6, 9.1. The id is
+ * URL-path-encoded and the OK payload (the updated, cancelled transfer) is
+ * mapped onto the domain {@link ScheduledTransfer} via {@link mapScheduledTransfer}.
+ */
+export async function cancelScheduledTransfer(
+  id: string,
+  deps: SandboxDeps = {},
+): Promise<SandboxResult<ScheduledTransfer>> {
+  // ASSUMED: scheduled-transfer cancel endpoint is
+  // `POST /payments/scheduled-transfers/{id}/cancel`.
+  const path = `/payments/scheduled-transfers/${encodeURIComponent(id)}/cancel`;
+  const result = await sandboxFetch<WireScheduledTransfer>(path, { method: 'POST' }, {}, deps);
+  return mapResult(result, mapScheduledTransfer);
+}
+
+
+// ===========================================================================
+// AI banking assistant (chat) - Phase 1 (read-only).
+// ===========================================================================
+//
+// Proxy one chat turn to the bank backend ai-assistant-service, reached
+// through the sandbox gateway at POST {sandboxApiBaseUrl}/ai/chat. This app
+// NEVER calls the model provider directly and holds no model-provider key;
+// the AI lives entirely in the backend. Like createTransfer, this function
+// resolves the two credentials strictly server-side and injects them via
+// buildHeaders, so the OIDC access token and the Sandbox_Key never reach the
+// browser (Requirements 6.1-6.3, 6.7). The request body
+// { message, history, confirmation? } is forwarded verbatim to the backend.
+//
+// The HTTP outcome is mapped to a typed AssistantChatResult: a 2xx carries the
+// backend parsed JSON reply (and its status); 401/429 map to the dedicated
+// re-auth / rate-limit variants; any other status, a timeout, or a
+// connectivity failure maps to an ERROR variant - none of which echo the
+// token or key. The BFF route turns this result into the app standard error
+// responses.
+export async function chatWithAssistant(
+  body: AssistantChatRequest,
+  deps: SandboxDeps = {},
+): Promise<AssistantChatResult> {
+  const getAccessToken = deps.getAccessToken ?? defaultGetAccessToken;
+  const getSandboxConfig = deps.getSandboxConfig ?? defaultGetSandboxConfig;
+  const fetchImpl = deps.fetchImpl ?? fetch;
+
+  // 1. Resolve credentials strictly server-side.
+  const { sandboxApiBaseUrl, sandboxApiKey } = getSandboxConfig();
+  const token = await getAccessToken();
+
+  // 2. Missing credential -> no outbound request (mirrors sandboxFetch); the
+  //    BFF maps UNAUTHENTICATED to a 401 so the browser re-authenticates.
+  if (!token || !sandboxApiKey) {
+    return { kind: 'UNAUTHENTICATED' };
+  }
+
+  // 3. Build headers (Authorization + X-Sandbox-Key + JSON content type).
+  const headers = buildHeaders({
+    token,
+    apiKey: sandboxApiKey,
+    hasBody: true,
+    extra: undefined,
+  });
+
+  // 4. Timeout via AbortController.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_CHAT_TIMEOUT_MS);
+
+  try {
+    const res = await fetchImpl(`${sandboxApiBaseUrl}/ai/chat`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      signal: controller.signal,
+      credentials: 'omit',
+    });
+
+    if (res.status === 401) return { kind: 'UNAUTHENTICATED' };
+    if (res.status === 429) return { kind: 'RATE_LIMITED' };
+
+    if (res.ok) {
+      try {
+        const reply = (await res.json()) as AssistantChatReply;
+        return { kind: 'OK', status: res.status, reply };
+      } catch {
+        // A 2xx with an unparseable body is an unexpected contract break.
+        return { kind: 'ERROR', reason: 'UNEXPECTED', status: res.status };
+      }
+    }
+
+    // Any other non-2xx: surface the status without upstream body detail.
+    return { kind: 'ERROR', reason: 'HTTP', status: res.status };
+  } catch (err) {
+    // 5. Map transport failures without leaking secrets.
+    if (isAbortError(err)) {
+      return { kind: 'ERROR', reason: 'TIMEOUT' };
+    }
+    return { kind: 'ERROR', reason: 'NETWORK' };
+  } finally {
+    clearTimeout(timer);
   }
 }

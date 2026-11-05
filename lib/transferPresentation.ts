@@ -327,3 +327,297 @@ export function mapTransferResult(result: TransferResult): TransferPresentation 
       return presentGenericError('UNEXPECTED');
   }
 }
+
+/**
+ * -----------------------------------------------------------------------------
+ * Mutating-operation outcome mapper (task 4.1).
+ * -----------------------------------------------------------------------------
+ *
+ * {@link mapMutationOutcome} is the pure, total, deterministic sibling of
+ * {@link mapTransferOutcome}, covering the *new* mutating capabilities this
+ * spec adds: open/close account, create/delete payee, create/cancel scheduled
+ * transfer, and profile update. Like its transfer counterpart it is free of any
+ * server-only import and carries no secrets, so the new mutating views can feed
+ * it the `{ status, error?, message? }` JSON their BFF route returns and decide
+ * what outcome state to render.
+ *
+ * Design references:
+ *   - requirements.md Requirements 3.8-3.12, 5.10-5.12, 6.10-6.13, 7.11-7.12,
+ *     10.5, 10.6 (one distinct observable state per outcome).
+ *   - design.md "Error Handling -> New mutating-operation outcome mapping"
+ *     table, and Correctness Property 4 (mutation outcome determinism and
+ *     totality).
+ *   - design.md Property 5: executed scheduled-transfer outcomes REUSE
+ *     {@link mapTransferOutcome} and are intentionally NOT handled here, so the
+ *     Transfer_Form and the scheduled view share a single outcome mapping.
+ *
+ * The status -> UI-state table (design.md):
+ *   | 201 / 202                         | Success (created / accepted)        |
+ *   | 403                               | Not authorized to manage (distinct) |
+ *   | 409                               | Conflict; message from `error` code |
+ *   | 401                               | Re-authentication required          |
+ *   | 429                               | Rate limit; no auto-retry < 60 s    |
+ *   | timeout(504) / network(502) / any | Generic retryable error             |
+ *
+ * Correctness Property 4: for *any* integer status the mapper yields exactly
+ * one presentation; the covered statuses 201/202/403/409/401/429 map
+ * mutually-exclusively to distinct observable states; every other status /
+ * timeout / connectivity failure maps to the generic retryable error. The
+ * function is therefore total and never throws, with no I/O, randomness, or
+ * time dependence.
+ */
+
+/**
+ * Stable, machine-readable discriminator for a mutation outcome, independent of
+ * the raw HTTP status. The UI (and tests) branch on this without re-deriving
+ * the status. Kept distinct from {@link TransferOutcomeKind} so the two
+ * surfaces cannot be accidentally conflated.
+ */
+export type MutationOutcomeKind =
+  | 'CREATED'
+  | 'ACCEPTED'
+  | 'FORBIDDEN'
+  | 'CONFLICT'
+  | 'UNAUTHENTICATED'
+  | 'RATE_LIMITED'
+  | 'TIMEOUT'
+  | 'NETWORK'
+  | 'UNEXPECTED';
+
+/**
+ * The minimum delay, in seconds, before a rate-limited mutation may be retried
+ * automatically (Requirements 3.11, 5.12, 6.13, 10.6). The UI MUST NOT auto-retry
+ * before this window elapses.
+ */
+export const MUTATION_RATE_LIMIT_RETRY_AFTER_SECONDS = 60;
+
+/**
+ * The deterministic, user-facing presentation model for one mutation outcome.
+ * Shares the {@link TransferSeverity} vocabulary with the transfer presentation
+ * and carries no secret and no raw upstream payload beyond a safe,
+ * human-readable `message`.
+ */
+export interface MutationPresentation {
+  /** Stable discriminator for the outcome (not the raw HTTP status). */
+  kind: MutationOutcomeKind;
+  /** Banner / outcome-state severity, reusing the transfer severity vocabulary. */
+  severity: TransferSeverity;
+  /** Short human-readable title (e.g. "Account opened"). */
+  title: string;
+  /** Longer human-readable explanation suitable for display to the customer. */
+  message: string;
+  /**
+   * Whether the mutation succeeded (201 created or 202 accepted). The caller
+   * uses this to render the success outcome state and to refresh dependent
+   * reads on their next request (Requirements 3.3, 3.6, 5.3, 6.4, 7.11).
+   */
+  isSuccess: boolean;
+  /**
+   * Whether this outcome means the customer must re-authenticate. True only for
+   * a 401 (Requirements 3.10, 5.11, 6.11, 7.13): the caller routes to
+   * re-authentication.
+   */
+  requiresReauth: boolean;
+  /**
+   * Whether this outcome is a rate-limit (HTTP 429). The UI shows a rate-limit
+   * message and suppresses any automatic retry before
+   * {@link MUTATION_RATE_LIMIT_RETRY_AFTER_SECONDS} elapses
+   * (Requirements 3.11, 5.12, 6.13, 10.6).
+   */
+  isRateLimit: boolean;
+  /**
+   * The minimum delay (seconds) before an automatic retry is permitted. Set to
+   * {@link MUTATION_RATE_LIMIT_RETRY_AFTER_SECONDS} for a rate-limit outcome and
+   * `0` otherwise.
+   */
+  retryAfterSeconds: number;
+  /**
+   * Whether the UI should offer a retry action that re-initiates the same
+   * request. True for transient transport failures / unexpected errors
+   * (Requirements 3.12, 5.10, 6.10, 7.12) and for rate limiting (after the
+   * delay). False for the terminal business outcomes (success / forbidden /
+   * conflict) and for re-auth, where retrying the identical request is not the
+   * right next step.
+   */
+  canRetry: boolean;
+}
+
+/**
+ * Human-readable copy for each known mutation 409 business conflict `error`
+ * code (Requirements 3.9, 6.12). Mirrors the {@link CONFLICT_COPY} pattern used
+ * for transfers; any unknown or missing code falls back to a generic conflict
+ * explanation so the mapping stays total. Covers the close-account conflicts
+ * (non-zero balance / already closed) and the scheduled-transfer cancellation
+ * conflicts (already executed / already cancelled).
+ */
+const MUTATION_CONFLICT_COPY: Record<string, { title: string; message: string }> = {
+  ACCOUNT_NOT_EMPTY: {
+    title: 'Account not empty',
+    message: 'This account still holds a balance and cannot be closed until it is zero.',
+  },
+  ACCOUNT_ALREADY_CLOSED: {
+    title: 'Account already closed',
+    message: 'This account has already been closed.',
+  },
+  ALREADY_EXECUTED: {
+    title: 'Already executed',
+    message: 'This scheduled transfer has already executed and can no longer be cancelled.',
+  },
+  ALREADY_CANCELLED: {
+    title: 'Already cancelled',
+    message: 'This scheduled transfer has already been cancelled.',
+  },
+};
+
+/** Build the presentation for a mutation 409 conflict from its `error` code. */
+function presentMutationConflict(errorCode: string | undefined): MutationPresentation {
+  // Only match *own*, known conflict codes. A bare index into the object would
+  // resolve inherited Object.prototype members (`__proto__`, `toString`, ...)
+  // and skip the generic fallback, breaking totality. `Object.hasOwn` ensures
+  // every unknown/inherited key falls through to the generic conflict copy.
+  const known =
+    errorCode !== undefined && Object.hasOwn(MUTATION_CONFLICT_COPY, errorCode)
+      ? MUTATION_CONFLICT_COPY[errorCode]
+      : undefined;
+  const copy = known ?? {
+    title: 'Request rejected',
+    message: 'This request could not be completed due to a conflict.',
+  };
+  return {
+    kind: 'CONFLICT',
+    severity: 'error',
+    title: copy.title,
+    message: copy.message,
+    isSuccess: false,
+    requiresReauth: false,
+    isRateLimit: false,
+    retryAfterSeconds: 0,
+    canRetry: false,
+  };
+}
+
+/** The generic error presentation for transport failures and any uncovered status. */
+function presentMutationGenericError(
+  kind: 'TIMEOUT' | 'NETWORK' | 'UNEXPECTED',
+): MutationPresentation {
+  const copy: Record<typeof kind, { title: string; message: string }> = {
+    TIMEOUT: {
+      title: 'Request timed out',
+      message: 'The request did not complete in time. Please try again.',
+    },
+    NETWORK: {
+      title: 'Connection problem',
+      message: 'We could not reach the service. Check your connection and try again.',
+    },
+    UNEXPECTED: {
+      title: 'Something went wrong',
+      message: 'An unexpected error occurred. Your change was not applied. Please try again.',
+    },
+  };
+  return {
+    kind,
+    severity: 'error',
+    title: copy[kind].title,
+    message: copy[kind].message,
+    isSuccess: false,
+    requiresReauth: false,
+    isRateLimit: false,
+    retryAfterSeconds: 0,
+    canRetry: true,
+  };
+}
+
+/**
+ * Map a *mutating*-operation outcome (the BFF `{ status, error?, message? }`
+ * response for open/close account, create/delete payee, create/cancel scheduled
+ * transfer, or profile update) to exactly one {@link MutationPresentation}.
+ *
+ * This is the new-mutation counterpart of {@link mapTransferOutcome}; it does
+ * NOT handle executed scheduled-transfer outcomes, which reuse
+ * {@link mapTransferOutcome} so the AML held/blocked outcomes render exactly as
+ * the Transfer_Form (Property 5).
+ *
+ * Totality: the switch covers every explicitly-handled status; the `default`
+ * branch funnels the transport-error statuses (504 TIMEOUT, 502 NETWORK/
+ * UNEXPECTED) and *every other* status to the generic error presentation. The
+ * function therefore returns a value for any integer `status` and never throws.
+ */
+export function mapMutationOutcome(input: {
+  status: number;
+  error?: string;
+  message?: string;
+}): MutationPresentation {
+  switch (input.status) {
+    case 201:
+      return {
+        kind: 'CREATED',
+        severity: 'success',
+        title: 'Change saved',
+        message: 'Your request was completed successfully.',
+        isSuccess: true,
+        requiresReauth: false,
+        isRateLimit: false,
+        retryAfterSeconds: 0,
+        canRetry: false,
+      };
+    case 202:
+      return {
+        kind: 'ACCEPTED',
+        severity: 'success',
+        title: 'Request accepted',
+        message: 'Your request was accepted and is being processed.',
+        isSuccess: true,
+        requiresReauth: false,
+        isRateLimit: false,
+        retryAfterSeconds: 0,
+        canRetry: false,
+      };
+    case 403:
+      return {
+        kind: 'FORBIDDEN',
+        severity: 'error',
+        title: 'Not authorized',
+        message: 'You are not authorized to manage this item.',
+        isSuccess: false,
+        requiresReauth: false,
+        isRateLimit: false,
+        retryAfterSeconds: 0,
+        canRetry: false,
+      };
+    case 409:
+      return presentMutationConflict(input.error);
+    case 401:
+      return {
+        kind: 'UNAUTHENTICATED',
+        severity: 'error',
+        title: 'Session expired',
+        message: 'Your session is no longer valid. Please sign in again to continue.',
+        isSuccess: false,
+        requiresReauth: true,
+        isRateLimit: false,
+        retryAfterSeconds: 0,
+        canRetry: false,
+      };
+    case 429:
+      return {
+        kind: 'RATE_LIMITED',
+        severity: 'warning',
+        title: 'Too many requests',
+        message: 'You have made too many requests. Please wait a moment before trying again.',
+        isSuccess: false,
+        requiresReauth: false,
+        isRateLimit: true,
+        retryAfterSeconds: MUTATION_RATE_LIMIT_RETRY_AFTER_SECONDS,
+        canRetry: true,
+      };
+    case 504:
+      return presentMutationGenericError('TIMEOUT');
+    case 502:
+      // The BFF uses 502 for both NETWORK and UNEXPECTED; distinguish by the
+      // forwarded `error` code so the message is as specific as possible, while
+      // both remain generic retryable errors.
+      return presentMutationGenericError(input.error === 'NETWORK' ? 'NETWORK' : 'UNEXPECTED');
+    default:
+      return presentMutationGenericError('UNEXPECTED');
+  }
+}

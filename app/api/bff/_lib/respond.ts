@@ -151,6 +151,48 @@ export function respondFromResult<T>(result: SandboxResult<T>): NextResponse {
  * No branch includes anything beyond `status` + `error` (+ a non-secret
  * `message` for 409), so the access token and Sandbox_Key are never exposed.
  */
+/**
+ * Map a typed {@link SandboxResult} to the HTTP response the browser receives
+ * for a *mutating* new BFF route — open/close account, create/delete payee,
+ * create/cancel scheduled transfer, and profile update (task 2.3).
+ *
+ * This is a thin wrapper over {@link respondFromResult}: it differs only in the
+ * `OK` branch, where a successful mutation forwards a distinct success status
+ * so the client can tell a created/accepted mutation apart from a plain 200
+ * read. The status is `201 Created` by default and overridable via
+ * `createdStatus` (e.g. `202 Accepted` for an asynchronously-processed
+ * mutation). Every non-`OK` variant is delegated to {@link respondFromResult}
+ * so the 401 / 429 / timeout / network / clamped-HTTP (with forwarded upstream
+ * `error` code, e.g. a 403 or 409) / unexpected branches behave identically —
+ * a single source of truth for the error mapping.
+ *
+ * Because the `OK` branch forwards only the parsed JSON `data` with the chosen
+ * status, and every error branch is `respondFromResult`'s (which forwards only
+ * `status` + `error`), nothing beyond `status` + `error`/`data` is ever
+ * returned: the access token, the Sandbox_Key, and the raw upstream request
+ * headers are structurally absent from a `SandboxResult<T>` and never reach any
+ * response status line, header, body, or cookie (Requirements 9.2, 9.4, 9.7).
+ *
+ * @param result  the typed outcome from a mutating `sandboxClient` function.
+ * @param opts.createdStatus  the success status to forward for an `OK` result;
+ *                            defaults to `201`. Use `202` for accepted-but-not-
+ *                            yet-completed mutations.
+ */
+export function respondFromMutationResult<T>(
+  result: SandboxResult<T>,
+  opts?: { createdStatus?: number },
+): NextResponse {
+  if (result.kind === 'OK') {
+    const createdStatus = opts?.createdStatus ?? 201;
+    return NextResponse.json(result.data, { status: createdStatus });
+  }
+  // All non-OK variants reuse the existing read mapping identically:
+  //   UNAUTHENTICATED -> 401, RATE_LIMITED -> 429, ERROR TIMEOUT -> 504,
+  //   NETWORK -> 502, HTTP -> clamped upstream status + forwarded error code
+  //   (so a 403/409 upstream forwards with its error code), UNEXPECTED -> 502.
+  return respondFromResult(result);
+}
+
 export function respondFromTransferResult(result: TransferResult): NextResponse {
   switch (result.kind) {
     case 'COMPLETED':

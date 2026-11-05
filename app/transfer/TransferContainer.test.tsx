@@ -91,6 +91,15 @@ function installFetch(transfer: TransferResponder) {
         return Promise.resolve(jsonResponse(ACCOUNTS));
       }
 
+      // The Payee_Picker rendered alongside the Transfer_Form lists the
+      // customer's saved payees from this same-origin BFF read endpoint. These
+      // container tests focus on the transfer-submission flow, so an empty
+      // payee list is sufficient to let the picker settle into its empty state
+      // without interfering with the form assertions.
+      if (url.includes('/api/bff/payees') && method === 'GET') {
+        return Promise.resolve(jsonResponse([]));
+      }
+
       if (url.includes('/api/bff/transfers') && method === 'POST') {
         const raw = typeof init?.body === 'string' ? init.body : '{}';
         transferCalls.push({ body: JSON.parse(raw) as CapturedTransfer['body'] });

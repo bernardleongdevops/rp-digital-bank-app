@@ -59,9 +59,28 @@ export interface TransferFormProps {
   onValidSubmit?: (values: TransferFormValues) => void;
   /** True while a submission started by `onValidSubmit` is in flight (9.2). */
   submitting?: boolean;
+  /**
+   * Optional external prefill for the "To account" field (task 8.1,
+   * Requirements 5.5, 5.6 / Property 10). When the Payee_Picker selects a
+   * Saved_Payee, `TransferContainer` passes that payee's destination account
+   * here together with a monotonically increasing `prefillNonce`; each new
+   * nonce sets `toAccount` to EXACTLY the supplied value. The nonce lets the
+   * same destination be re-applied (e.g. after the customer edits the field
+   * and re-selects the same payee) and keeps the field fully user-editable
+   * afterwards — the prefill only applies on a nonce change, never on every
+   * render. When omitted the form behaves exactly as before (no prefill).
+   */
+  prefillToAccount?: string;
+  /** Changes whenever a new `prefillToAccount` selection should be applied. */
+  prefillNonce?: number;
 }
 
-export function TransferForm({ onValidSubmit, submitting = false }: TransferFormProps) {
+export function TransferForm({
+  onValidSubmit,
+  submitting = false,
+  prefillToAccount,
+  prefillNonce,
+}: TransferFormProps) {
   const [accountsState, setAccountsState] = useState<AccountsState>({ status: 'loading' });
   const [values, setValues] = useState<TransferFormValues>(EMPTY_VALUES);
   const [errors, setErrors] = useState<TransferFormErrors>({});
@@ -110,6 +129,27 @@ export function TransferForm({ onValidSubmit, submitting = false }: TransferForm
     },
     [attempted, ownedAccounts],
   );
+
+  /**
+   * Apply an external "To account" prefill when a new Payee_Picker selection
+   * arrives (keyed on `prefillNonce` so it fires once per selection, not on
+   * every render). The field stays fully editable afterwards. When a submit
+   * has already been attempted, re-validate live so the destination error
+   * clears as the prefill fills it (Requirements 5.5, 5.6 / Property 10).
+   */
+  useEffect(() => {
+    if (prefillNonce === undefined || prefillToAccount === undefined) return;
+    setValues((prev) => {
+      const next = { ...prev, toAccount: prefillToAccount };
+      if (attempted) {
+        setErrors(validateTransferForm(next, ownedAccounts));
+      }
+      return next;
+    });
+    // `attempted` / `ownedAccounts` are read for live re-validation but the
+    // prefill is intentionally driven solely by a change in `prefillNonce`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillNonce]);
 
   const handleSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
