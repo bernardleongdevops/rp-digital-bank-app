@@ -1,0 +1,76 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm run test -- --run
+
+      - name: Build
+        env:
+          NEXTAUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          NEXTAUTH_SECRET: ci-only-not-a-deployment-secret
+          KEYCLOAK_ISSUER: http://localhost:8080/realms/digital-bank
+          KEYCLOAK_CLIENT_ID: sandbox-web
+          SANDBOX_API_BASE_URL: http://localhost:8081/api/v1
+          SANDBOX_API_KEY: ci-only-key
+        run: npm run build
+
+  deploy-local:
+    needs: build-and-test
+
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch'
+      )
+
+    runs-on: [self-hosted, linux, x64, bank-frontend]
+
+    concurrency:
+      group: frontend-local-deployment
+      cancel-in-progress: false
+
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out tested commit
+        uses: actions/checkout@v4
+
+      - name: Build and deploy frontend
+        run: bash deploy/deploy-local.sh
